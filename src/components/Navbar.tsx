@@ -24,7 +24,7 @@ const Navbar = () => {
           <div className="bg-primary rounded-full p-2">
             <Sprout className="h-7 w-7 text-primary-foreground" />
           </div>
-          <span className="text-2xl font-extrabold text-primary">FarmLink</span>
+          <span className="text-2xl font-extrabold text-primary">GreenLink</span>
         </div>
 
         {/* Desktop nav */}
