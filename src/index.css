@@ -89,14 +89,26 @@
   }
 }
 
-/* Google Translate overrides for clean look */
-.goog-te-banner-frame { display: none !important; }
-body { top: 0 !important; }
-.goog-te-gadget { font-family: inherit !important; }
-.goog-te-gadget-simple {
-  background-color: hsl(var(--card)) !important;
-  border: 2px solid hsl(var(--primary)) !important;
-  border-radius: var(--radius) !important;
-  padding: 8px 16px !important;
-  font-size: 1.1rem !important;
+/* Hide the Google Translate banner */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+.skiptranslate {
+  display: none !important;
+}
+
+body {
+  top: 0px !important;
+}
+
+/* Remove yellow highlights */
+.goog-text-highlight {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Hide tooltip */
+.goog-tooltip {
+  display: none !important;
 }

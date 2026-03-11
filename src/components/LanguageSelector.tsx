@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Globe } from "lucide-react";
+import { Globe, ChevronDown } from "lucide-react";
 
 declare global {
   interface Window {
@@ -56,9 +56,7 @@ const LanguageSelector = () => {
   }, []);
 
   const changeLanguage = (langCode: string) => {
-    const select = document.querySelector(
-      ".goog-te-combo"
-    ) as HTMLSelectElement;
+    const select = document.querySelector(".goog-te-combo") as HTMLSelectElement;
 
     if (!select) return;
 
@@ -71,25 +69,57 @@ const LanguageSelector = () => {
 
   return (
     <div className="flex items-center gap-2">
+
       <Globe className="h-5 w-5 text-primary" />
 
-      <select
-        value={lang}
-        onChange={(e) => changeLanguage(e.target.value)}
-        className="bg-background border border-border rounded-md px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
-      >
-        {languages.map((l) => (
-          <option key={l.code} value={l.code}>
-            {l.name}
-          </option>
-        ))}
-      </select>
+      <div className="relative">
 
-      {/* Hidden Google element */}
+        <select
+          value={lang}
+          onChange={(e) => changeLanguage(e.target.value)}
+          className="
+          appearance-none
+          bg-card
+          border
+          border-border
+          rounded-lg
+          px-3
+          pr-8
+          py-1.5
+          text-sm
+          text-foreground
+          shadow-sm
+          focus:outline-none
+          focus:ring-2
+          focus:ring-primary
+          "
+        >
+          {languages.map((l) => (
+            <option key={l.code} value={l.code}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+
+        <ChevronDown
+          className="
+          pointer-events-none
+          absolute
+          right-2
+          top-1/2
+          -translate-y-1/2
+          h-4
+          w-4
+          text-muted-foreground
+          "
+        />
+
+      </div>
+
       <div id="google_translate_element" className="hidden"></div>
+
     </div>
   );
 };
 
 export default LanguageSelector;
-
