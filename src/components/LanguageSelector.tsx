@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Globe } from "lucide-react";
 
 declare global {
@@ -8,9 +8,30 @@ declare global {
   }
 }
 
+const languages = [
+  { code: "en", name: "English" },
+  { code: "hi", name: "Hindi" },
+  { code: "ta", name: "Tamil" },
+  { code: "te", name: "Telugu" },
+  { code: "kn", name: "Kannada" },
+  { code: "ml", name: "Malayalam" },
+  { code: "bn", name: "Bengali" },
+  { code: "mr", name: "Marathi" },
+  { code: "gu", name: "Gujarati" },
+  { code: "pa", name: "Punjabi" },
+  { code: "ur", name: "Urdu" }
+];
+
 const LanguageSelector = () => {
+  const [lang, setLang] = useState("en");
+
   useEffect(() => {
-    // Add Google Translate script
+    const savedLang = localStorage.getItem("site_lang");
+    if (savedLang) {
+      setLang(savedLang);
+      changeLanguage(savedLang);
+    }
+
     const addScript = () => {
       const script = document.createElement("script");
       script.src =
@@ -23,10 +44,7 @@ const LanguageSelector = () => {
       new window.google.translate.TranslateElement(
         {
           pageLanguage: "en",
-          includedLanguages:
-            "en,hi,ta,te,kn,ml,bn,mr,gu,pa,or,as,ur",
-          layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
-          autoDisplay: false,
+          autoDisplay: false
         },
         "google_translate_element"
       );
@@ -37,12 +55,41 @@ const LanguageSelector = () => {
     }
   }, []);
 
+  const changeLanguage = (langCode: string) => {
+    const select = document.querySelector(
+      ".goog-te-combo"
+    ) as HTMLSelectElement;
+
+    if (!select) return;
+
+    select.value = langCode;
+    select.dispatchEvent(new Event("change"));
+
+    setLang(langCode);
+    localStorage.setItem("site_lang", langCode);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <Globe className="h-5 w-5 text-primary" />
-      <div id="google_translate_element" />
+
+      <select
+        value={lang}
+        onChange={(e) => changeLanguage(e.target.value)}
+        className="bg-background border border-border rounded-md px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
+      >
+        {languages.map((l) => (
+          <option key={l.code} value={l.code}>
+            {l.name}
+          </option>
+        ))}
+      </select>
+
+      {/* Hidden Google element */}
+      <div id="google_translate_element" className="hidden"></div>
     </div>
   );
 };
 
 export default LanguageSelector;
+

@@ -9,6 +9,11 @@ import { Sprout, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 
+/* ================================
+   EMAIL VERIFICATION SWITCH
+================================ */
+const REQUIRE_EMAIL_VERIFICATION = false;
+
 type AppRole = "farmer" | "buyer" | "shop";
 
 const Auth = () => {
@@ -21,6 +26,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState<AppRole>(defaultRole);
   const [loading, setLoading] = useState(false);
+
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -43,24 +49,40 @@ const Auth = () => {
             emailRedirectTo: window.location.origin,
           },
         });
+
         if (error) throw error;
 
         if (data.user) {
           const { error: roleError } = await supabase
             .from("user_roles")
             .insert({ user_id: data.user.id, role });
+
           if (roleError) console.error("Role insert error:", roleError);
         }
 
-        toast({
-          title: "Account created! 🎉",
-          description: "Check your email to confirm, then sign in.",
-        });
+        if (REQUIRE_EMAIL_VERIFICATION) {
+          toast({
+            title: "Account created!",
+            description: "Check your email to verify your account.",
+          });
+        } else {
+          toast({
+            title: "Account created!",
+            description: "You can now log in immediately.",
+          });
+        }
+
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
         if (error) throw error;
+
         navigate("/");
       }
+
     } catch (error: any) {
       toast({
         title: "Error",
@@ -87,9 +109,11 @@ const Auth = () => {
               <Sprout className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
+
           <CardTitle className="text-2xl font-extrabold text-primary">
             {isSignUp ? "Join FarmLink" : "Welcome Back"}
           </CardTitle>
+
           <CardDescription className="text-base">
             {isSignUp
               ? "Create your account to start trading directly"
@@ -99,12 +123,14 @@ const Auth = () => {
 
         <CardContent>
           <form onSubmit={handleAuth} className="space-y-4">
+
             {isSignUp && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="fullName" className="text-base font-semibold">
                     Full Name
                   </Label>
+
                   <Input
                     id="fullName"
                     value={fullName}
@@ -116,7 +142,10 @@ const Auth = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-base font-semibold">I am a...</Label>
+                  <Label className="text-base font-semibold">
+                    I am a...
+                  </Label>
+
                   <div className="grid grid-cols-3 gap-2">
                     {roles.map((r) => (
                       <button
@@ -142,6 +171,7 @@ const Auth = () => {
               <Label htmlFor="email" className="text-base font-semibold">
                 Email
               </Label>
+
               <Input
                 id="email"
                 type="email"
@@ -157,6 +187,7 @@ const Auth = () => {
               <Label htmlFor="password" className="text-base font-semibold">
                 Password
               </Label>
+
               <Input
                 id="password"
                 type="password"
@@ -177,6 +208,7 @@ const Auth = () => {
               {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               {isSignUp ? "Create Account" : "Sign In"}
             </Button>
+
           </form>
 
           <div className="mt-6 text-center">
@@ -190,6 +222,7 @@ const Auth = () => {
                 : "Don't have an account? Sign Up"}
             </button>
           </div>
+
         </CardContent>
       </Card>
     </div>
