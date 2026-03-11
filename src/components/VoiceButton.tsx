@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Mic, MicOff, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -25,7 +25,6 @@ const LANG_MAP: Record<string, string> = {
 };
 
 const getSelectedLanguage = (): string => {
-  // Read language from Google Translate cookie
   const match = document.cookie.match(/googtrans=\/[^/]*\/([a-z]+)/);
   const lang = match ? match[1] : "en";
   return LANG_MAP[lang] || "en-US";
@@ -33,59 +32,87 @@ const getSelectedLanguage = (): string => {
 
 const VoiceButton = ({ onResult, textToSpeak, className }: VoiceButtonProps) => {
   const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   const startListening = useCallback(() => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Voice not supported in this browser. Please use Chrome.");
+      alert("Voice input is only supported in Chrome or Edge.");
       return;
     }
 
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+
     const recognition = new SpeechRecognition();
+
     recognition.lang = getSelectedLanguage();
     recognition.interimResults = false;
+    recognition.continuous = false;
     recognition.maxAlternatives = 1;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
-    recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      onResult?.(text);
+    recognition.onstart = () => {
+      setIsListening(true);
     };
-    recognition.onerror = () => setIsListening(false);
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onResult?.(transcript);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      setIsListening(false);
+    };
 
     recognition.start();
+    recognitionRef.current = recognition;
   }, [onResult]);
 
   const speak = useCallback(() => {
     if (!textToSpeak) return;
+
     const utterance = new SpeechSynthesisUtterance(textToSpeak);
     utterance.lang = getSelectedLanguage();
+    utterance.rate = 1;
+    utterance.pitch = 1;
+
+    speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
   }, [textToSpeak]);
 
   return (
-    <div className={`flex gap-2 ${className}`}>
+    <div className={`flex gap-2 ${className || ""}`}>
       <Button
         variant={isListening ? "destructive" : "default"}
-        size="lg"
+        size="icon"
         onClick={startListening}
-        className="min-h-[56px] min-w-[56px] rounded-full text-lg"
+        className="h-12 w-12 rounded-full"
         aria-label="Voice input"
       >
-        {isListening ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+        {isListening ? (
+          <MicOff className="h-5 w-5" />
+        ) : (
+          <Mic className="h-5 w-5" />
+        )}
       </Button>
+
       {textToSpeak && (
         <Button
           variant="outline"
-          size="lg"
+          size="icon"
           onClick={speak}
-          className="min-h-[56px] min-w-[56px] rounded-full text-lg border-2 border-primary"
+          className="h-12 w-12 rounded-full"
           aria-label="Listen"
         >
-          <Volume2 className="h-6 w-6" />
+          <Volume2 className="h-5 w-5" />
         </Button>
       )}
     </div>
