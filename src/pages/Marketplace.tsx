@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../hooks/integrations/supabase/client";
+import { supabase } from "../hooks//integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Search, MapPin, Package, IndianRupee, Calendar, Loader2, Filter } from "lucide-react";
+import { Search, MapPin, Package, Calendar, Loader2, ShoppingCart, X, CheckCircle } from "lucide-react";
+import { toast } from "sonner";
 
 interface Crop {
   id: string;
@@ -16,11 +18,29 @@ interface Crop {
   user_id: string;
 }
 
+interface CartItem {
+  crop: Crop;
+  qty: number;
+}
+
+const UPI_OPTIONS = [
+  { id: "gpay", label: "Google Pay", icon: "💳" },
+  { id: "phonepe", label: "PhonePe", icon: "📱" },
+  { id: "paytm", label: "Paytm", icon: "💰" },
+  { id: "bhim", label: "BHIM UPI", icon: "🏦" },
+];
+
 const Marketplace = () => {
+  const { user } = useAuth();
   const [crops, setCrops] = useState<Crop[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [showCart, setShowCart] = useState(false);
+  const [selectedUpi, setSelectedUpi] = useState("gpay");
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
   useEffect(() => {
     fetchCrops();
@@ -42,8 +62,6 @@ const Marketplace = () => {
     return matchSearch && matchLocation;
   });
 
-  const locations = [...new Set(crops.map((c) => c.location))];
-
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
     const now = new Date();
@@ -56,9 +74,173 @@ const Marketplace = () => {
     return `${diffDays} days ago`;
   };
 
+  const addToCart = (crop: Crop) => {
+    setCart((prev) => {
+      const existing = prev.find((i) => i.crop.id === crop.id);
+      if (existing) {
+        return prev.map((i) => i.crop.id === crop.id ? { ...i, qty: i.qty + 1 } : i);
+      }
+      return [...prev, { crop, qty: 1 }];
+    });
+    toast.success(`${crop.crop_name} added to cart`);
+  };
+
+  const removeFromCart = (cropId: string) => {
+    setCart((prev) => prev.filter((i) => i.crop.id !== cropId));
+  };
+
+  const updateQty = (cropId: string, qty: number) => {
+    if (qty < 1) return removeFromCart(cropId);
+    setCart((prev) => prev.map((i) => i.crop.id === cropId ? { ...i, qty } : i));
+  };
+
+  const cartTotal = cart.reduce((sum, i) => sum + i.crop.price_per_kg * i.qty, 0);
+
+  const placeOrder = async () => {
+    if (!user) {
+      toast.error("Please login to place an order");
+      return;
+    }
+    if (cart.length === 0) return;
+
+    setPlacingOrder(true);
+    const orders = cart.map((item) => ({
+      user_id: user.id,
+      crop_id: item.crop.id,
+      crop_name: item.crop.crop_name,
+      quantity_kg: item.qty,
+      total_price: item.crop.price_per_kg * item.qty,
+      payment_method: selectedUpi,
+      status: "placed",
+    }));
+
+    const { error } = await supabase.from("orders").insert(orders);
+    setPlacingOrder(false);
+
+    if (error) {
+      toast.error("Failed to place order. Please try again.");
+      return;
+    }
+
+    setOrderPlaced(true);
+    setCart([]);
+    setTimeout(() => {
+      setOrderPlaced(false);
+      setShowCart(false);
+    }, 3000);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
+
+      {/* Floating Cart Button */}
+      {cart.length > 0 && !showCart && (
+        <button
+          onClick={() => setShowCart(true)}
+          className="fixed bottom-6 right-6 z-50 bg-primary text-primary-foreground rounded-full p-4 shadow-lg hover:bg-primary/90 transition-all"
+        >
+          <ShoppingCart className="h-6 w-6" />
+          <span className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+            {cart.reduce((s, i) => s + i.qty, 0)}
+          </span>
+        </button>
+      )}
+
+      {/* Cart Sidebar */}
+      {showCart && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="bg-black/40 flex-1" onClick={() => setShowCart(false)} />
+          <div className="w-full max-w-md bg-card border-l border-border shadow-2xl flex flex-col h-full">
+            <div className="flex items-center justify-between p-4 border-b border-border">
+              <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" /> Your Cart
+              </h2>
+              <button onClick={() => setShowCart(false)}>
+                <X className="h-5 w-5 text-muted-foreground" />
+              </button>
+            </div>
+
+            {orderPlaced ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 p-6">
+                <CheckCircle className="h-16 w-16 text-primary" />
+                <h3 className="text-2xl font-bold text-foreground">Order Placed! 🎉</h3>
+                <p className="text-muted-foreground text-center">
+                  Your order has been placed successfully via {UPI_OPTIONS.find(u => u.id === selectedUpi)?.label}.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                  {cart.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">Cart is empty</p>
+                  ) : (
+                    cart.map((item) => (
+                      <div key={item.crop.id} className="bg-muted/50 rounded-xl p-4 flex items-center gap-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-foreground">{item.crop.crop_name}</h4>
+                          <p className="text-sm text-muted-foreground">₹{item.crop.price_per_kg}/kg</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button size="sm" variant="outline" onClick={() => updateQty(item.crop.id, item.qty - 1)}>-</Button>
+                          <span className="w-8 text-center font-semibold text-foreground">{item.qty}</span>
+                          <Button size="sm" variant="outline" onClick={() => updateQty(item.crop.id, item.qty + 1)}>+</Button>
+                        </div>
+                        <button onClick={() => removeFromCart(item.crop.id)}>
+                          <X className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                {cart.length > 0 && (
+                  <div className="border-t border-border p-4 space-y-4">
+                    {/* UPI Payment Selection */}
+                    <div>
+                      <p className="text-sm font-semibold text-foreground mb-2">Pay via UPI</p>
+                      <div className="grid grid-cols-2 gap-2">
+                        {UPI_OPTIONS.map((upi) => (
+                          <button
+                            key={upi.id}
+                            onClick={() => setSelectedUpi(upi.id)}
+                            className={`flex items-center gap-2 p-3 rounded-xl border text-sm font-medium transition-all ${
+                              selectedUpi === upi.id
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border text-muted-foreground hover:border-primary/30"
+                            }`}
+                          >
+                            <span>{upi.icon}</span>
+                            <span>{upi.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Total & Place Order */}
+                    <div className="flex items-center justify-between text-lg font-bold text-foreground">
+                      <span>Total</span>
+                      <span>₹{cartTotal.toFixed(2)}</span>
+                    </div>
+                    <Button
+                      className="w-full h-12 text-base font-semibold rounded-xl"
+                      onClick={placeOrder}
+                      disabled={placingOrder}
+                    >
+                      {placingOrder ? (
+                        <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Placing Order...</>
+                      ) : (
+                        "✅ Place Order"
+                      )}
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="container px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-5xl font-extrabold text-foreground mb-2">
@@ -135,8 +317,11 @@ const Marketplace = () => {
                       <span className="text-base">{formatDate(crop.created_at)}</span>
                     </div>
                   </div>
-                  <Button className="w-full mt-4 h-12 text-base font-semibold rounded-xl">
-                    📞 Contact Farmer
+                  <Button
+                    className="w-full mt-4 h-12 text-base font-semibold rounded-xl"
+                    onClick={() => addToCart(crop)}
+                  >
+                    🛒 Add to Cart
                   </Button>
                 </div>
               ))}
