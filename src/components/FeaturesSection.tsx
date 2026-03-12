@@ -15,7 +15,7 @@ const features = [
   },
   {
     icon: Calculator,
-    title: "Profit Calculator (In progress)",
+    title: "Profit Calculator",
     description: "Know your production cost, expected profit, and best selling price.",
     color: "bg-primary",
   },
