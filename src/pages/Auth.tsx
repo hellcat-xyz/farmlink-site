@@ -31,8 +31,6 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // --- REMOVED THE AUTO-REDIRECT EFFECT FROM HERE ---
-
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -68,8 +66,6 @@ const Auth = () => {
             title: "Account created!",
             description: "You can now log in immediately.",
           });
-          // Redirect to homepage after successful Sign Up
-          navigate("/"); 
         }
 
       } else {
@@ -125,47 +121,46 @@ const Auth = () => {
           <form onSubmit={handleAuth} className="space-y-4">
 
             {isSignUp && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="fullName" className="text-base font-semibold">
-                    Full Name
-                  </Label>
+              <div className="space-y-2">
+                <Label htmlFor="fullName" className="text-base font-semibold">
+                  Full Name
+                </Label>
 
-                  <Input
-                    id="fullName"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Enter your name"
-                    required
-                    className="h-12 text-base"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-base font-semibold">
-                    I am a...
-                  </Label>
-
-                  <div className="grid grid-cols-3 gap-2">
-                    {roles.map((r) => (
-                      <button
-                        key={r.value}
-                        type="button"
-                        onClick={() => setRole(r.value)}
-                        className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all text-center ${
-                          role === r.value
-                            ? "border-primary bg-primary/10 text-primary font-bold"
-                            : "border-border hover:border-primary/40"
-                        }`}
-                      >
-                        <span className="text-2xl">{r.emoji}</span>
-                        <span className="text-sm font-semibold">{r.label}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
+                <Input
+                  id="fullName"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your name"
+                  required
+                  className="h-12 text-base"
+                />
+              </div>
             )}
+
+            {/* Moved Role Selection here so it shows for both Sign In and Sign Up */}
+            <div className="space-y-2">
+              <Label className="text-base font-semibold">
+                I am a...
+              </Label>
+
+              <div className="grid grid-cols-2 gap-2">
+                {roles.map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setRole(r.value)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-lg border-2 transition-all text-center ${
+                      role === r.value
+                        ? "border-primary bg-primary/10 text-primary font-bold"
+                        : "border-border hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-2xl">{r.emoji}</span>
+                    <span className="text-sm font-semibold">{r.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email" className="text-base font-semibold">
