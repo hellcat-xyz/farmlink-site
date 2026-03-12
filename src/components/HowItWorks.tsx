@@ -32,7 +32,7 @@ const HowItWorks = () => {
             How It Works
           </h2>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Three simple steps. No middlemen. Better prices for everyone.
+            Three simple steps. Better prices for everyone.
           </p>
         </div>
 

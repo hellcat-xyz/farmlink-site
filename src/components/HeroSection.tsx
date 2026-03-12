@@ -30,7 +30,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-card/90 leading-relaxed max-w-xl">
-            FarmLink connects farmers with shops and consumers. Get better prices for your harvest. Simple to use, works in your language.
+            GreenLink connects farmers with shops and consumers. Get better prices for your harvest. Simple to use, works in your language.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
