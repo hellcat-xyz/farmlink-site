@@ -1,4 +1,4 @@
-import { Sprout, Menu, X, LogIn, LogOut, Moon, Sun } from "lucide-react";
+import { Menu, X, LogIn, LogOut, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import LanguageSelector from "./LanguageSelector";
@@ -19,11 +19,14 @@ const Navbar = () => {
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-sm border-b-2 border-primary/20 shadow-sm">
       <div className="container flex items-center justify-between py-3">
         
-        {/* Logo */}
+        {/* Logo Section */}
         <div className="flex items-center gap-2">
-          <div className="bg-primary rounded-full p-2">
-            <Sprout className="h-7 w-7 text-primary-foreground" />
-          </div>
+          {/* Replaced Sprout icon with your JPG */}
+          <img 
+            src="../public/logo.jpg" 
+            alt="GreenLink Logo" 
+            className="h-10 w-10 object-contain" 
+          />
           <span className="text-2xl font-extrabold text-primary">GreenLink</span>
         </div>
 
