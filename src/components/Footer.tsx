@@ -1,4 +1,4 @@
-import { Sprout, Heart } from "lucide-react";
+import { Heart } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -7,11 +7,16 @@ const Footer = () => {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
 
           <div className="flex items-center gap-2">
-            <div className="bg-primary rounded-full p-2">
-              <Sprout className="h-6 w-6 text-primary-foreground" />
+            {/* Kept the design wrapper, just swapped the icon for the image */}
+            <div className=" rounded-full p-2 overflow-hidden">
+              <img 
+                src="../public/logo.jpg" 
+                alt="GreenLink Logo" 
+                className="h-6 w-6 object-contain" 
+              />
             </div>
             <span className="text-xl font-extrabold text-primary">
-              FarmLink
+              GreenLink
             </span>
           </div>
 
