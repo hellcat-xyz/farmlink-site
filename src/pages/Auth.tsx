@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react"; // Removed useEffect from imports
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "../hooks/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -31,9 +31,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  useEffect(() => {
-    if (user) navigate("/");
-  }, [user, navigate]);
+  // --- REMOVED THE AUTO-REDIRECT EFFECT FROM HERE ---
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,6 +68,8 @@ const Auth = () => {
             title: "Account created!",
             description: "You can now log in immediately.",
           });
+          // Redirect to homepage after successful Sign Up
+          navigate("/"); 
         }
 
       } else {
@@ -80,7 +80,8 @@ const Auth = () => {
 
         if (error) throw error;
 
-        navigate("/");
+        // Redirect to marketplace ONLY after a manual, successful sign-in
+        navigate("/marketplace");
       }
 
     } catch (error: any) {
