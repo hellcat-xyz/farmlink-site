@@ -20,7 +20,7 @@ const HeroSection = () => {
       <div className="container relative z-10 py-16 md:py-28 px-4">
         <div className="max-w-2xl space-y-6 animate-fade-up">
           <div className="inline-block bg-secondary/90 text-secondary-foreground px-4 py-2 rounded-full text-lg font-bold">
-            🌱 No Middlemen. Fair Prices.
+             Fresh From Farm | Best Prices
           </div>
 
           <h1 className="text-4xl md:text-6xl font-extrabold text-card leading-tight">
