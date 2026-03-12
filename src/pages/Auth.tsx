@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 ================================ */
 const REQUIRE_EMAIL_VERIFICATION = false;
 
-type AppRole = "farmer" | "buyer" | "shop";
+type AppRole = "farmer" | "buyer";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -97,7 +97,6 @@ const Auth = () => {
   const roles: { value: AppRole; label: string; emoji: string }[] = [
     { value: "farmer", label: "Farmer", emoji: "👨‍🌾" },
     { value: "buyer", label: "Consumer", emoji: "🛒" },
-    { value: "shop", label: "Shop Owner", emoji: "🏪" },
   ];
 
   return (
@@ -111,13 +110,13 @@ const Auth = () => {
           </div>
 
           <CardTitle className="text-2xl font-extrabold text-primary">
-            {isSignUp ? "Join FarmLink" : "Welcome Back"}
+            {isSignUp ? "Join GreenLink" : "Welcome Back"}
           </CardTitle>
 
           <CardDescription className="text-base">
             {isSignUp
               ? "Create your account to start trading directly"
-              : "Sign in to your FarmLink account"}
+              : "Sign in to your GreenLink account"}
           </CardDescription>
         </CardHeader>
 
