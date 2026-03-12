@@ -3,13 +3,13 @@ import { TrendingUp, MapPin, Calculator, Star, Mic, Globe } from "lucide-react";
 const features = [
   {
     icon: TrendingUp,
-    title: "AI Price Recommendation",
+    title: "AI Price Recommendation(In progress)",
     description: "Get fair price suggestions based on real market data. No more guessing!",
     color: "bg-primary",
   },
   {
     icon: MapPin,
-    title: "Nearby Buyer Matching",
+    title: "Nearby Buyer Matching(In progress)",
     description: "Find restaurants, shops and consumers near you automatically.",
     color: "bg-secondary",
   },
