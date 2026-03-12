@@ -16,7 +16,7 @@ const Footer = () => {
           </div>
 
           <p className="text-muted-foreground text-center">
-            Smart marketplace connecting farmers directly with buyers
+            Smart marketplace (test) connecting farmers directly with buyers
           </p>
 
           <p className="flex items-center gap-1 text-muted-foreground">
